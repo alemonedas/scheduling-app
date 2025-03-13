@@ -1,114 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Who's playing football?</title>
+  <title>Football Attendance ⚽️</title>
   <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore-compat.js"></script>
-  <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@latest/css/pico.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@latest/css/pico.min.css">
   <style>
-    .columns {
-      display: flex;
-      justify-content: space-between;
-    }
-    .column {
-      width: 48%;
-      background: #f0f8ff;
-      border-radius: 10px;
-      padding: 10px;
-    }
-    .out-player {
-      text-decoration: line-through;
-      color: #888;
-    }
+    .columns { display: flex; gap: 1rem; }
+    .column { flex: 1; padding: 1rem; border-radius: 8px; }
+    #yesColumn { background-color: #e0ffe8; }
+    #noColumn { background-color: #f3f5f7; color: #777; }
+    .crossed-out { text-decoration: line-through; }
   </style>
 </head>
 <body>
   <main class="container">
     <h2>⚽️ Game Thursday @ 7pm (Goals Sunderland)</h2>
-    <input id="playerName" placeholder="Your Name" />
+    <input id="playerName" placeholder="Your Name">
     <button onclick="respond('Yes')">✅ I'm IN</button>
     <button onclick="respond('No')">❌ Can't make it</button>
     
     <div class="columns">
-      <div class="column">
-        <h3>✅ Players IN:</h3>
-        <ol id="yesList"></ul>
+      <div class="column" id="yesColumn">
+        <h4>✅ Players IN:</h3>
+        <ol id="yesList"></ol>
       </div>
-    <div class="column">
-      <h3>❌ Can't make it:</h3>
-      <ul id="noList"></ul>
+      <div class="column" id="noColumn">
+        <h4>❌ Can't make it:</h4>
+        <ul id="noList"></ul>
+      </div>
     </div>
   </div>
 
-<script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore-compat.js"></script>
 
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSy8dpuupiRtPUmfi5ru72SS2xAn7J8t27Y",
-    authDomain: "scheduling-app-80627.firebaseapp.com",
-    projectId: "scheduling-app-80627",
-    storageBucket: "scheduling-app-80627.appspot.com",
-    messagingSenderId: "1023997083225",
-    appId: "1:1023997083225:web:19e54b3493131f4411bb48"
-  };
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSy8dpuupiRtPUmfi5ru72SS2xAn7Jb8t27Y",
+      authDomain: "scheduling-app-80627.firebaseapp.com",
+      projectId: "scheduling-app-80627",
+      storageBucket: "scheduling-app-80627.appspot.com",
+      messagingSenderId: "1023997083225",
+      appId: "1:1023997083225:web:19e54b3493131f4411bb48"
+    };
 
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-  function respond(status) {
-    const name = document.getElementById("playerName").value.trim();
-    if (!name) { alert("Please enter your name!"); return; }
-    db.collection('games').doc(name).set({ status });
-  }
+    function respond(status) {
+      const nameInput = document.getElementById("playerName");
+      const name = nameInput.value.trim();
+      if (!name) { alert("Please enter your name!"); return; }
+      db.collection('games').doc(name).set({ status });
+      nameInput.value = '';
+    }
 
-  function updateLists(snapshot) {
-    const yesList = document.getElementById('yesList');
-    const noList = document.getElementById('noList');
-    yesList.innerHTML = '';
-    noList.innerHTML = '';
-    let count = 1;
+    db.collection('games').onSnapshot(snapshot => {
+      const yesList = document.getElementById('yesList');
+      const noList = document.getElementById('noList');
+      yesList.innerHTML = '';
+      noList.innerHTML = '';
+      let count = 1;
 
-    snapshot.forEach(doc => {
-      const name = doc.id;
-      const status = doc.data().status;
-      if(status === "Yes") {
-        yesList.innerHTML += `<li>${count++}. ${name}</li>`;
-      } else {
-        noList.innerHTML += `<li><s>${name}</s></li>`;
-      }
+      snapshot.forEach(doc => {
+        const name = doc.id;
+        const status = doc.data().status;
+        if (status === 'Yes') {
+          yesList.innerHTML += `<li>${name}</li>`;
+        } else {
+          noList.innerHTML += `<li class="crossed-out">${name}</li>`;
+        }
+      });
     });
-  }
-
-  function respond(status) {
-    const nameInput = document.getElementById("playerName");
-    const name = nameInput.value.trim();
-    if (!name) { alert("Please enter your name!"); return; }
-    db.collection('games').doc(name).set({ status });
-    nameInput.value = '';
-  }
-
-  db.collection('games').onSnapshot(snapshot => {
-    const yesList = document.getElementById('yesList');
-    const noList = document.getElementById('noList');
-    yesList.innerHTML = '';
-    noList.innerHTML = '';
-    let count = 1;
-
-    snapshot.forEach(doc => {
-      const name = doc.id;
-      const status = doc.data().status;
-      if (status === 'Yes') {
-        yesList.innerHTML += `<li>${count++}. ${name}</li>`;
-      } else {
-        noList.innerHTML += `<li style="text-decoration: line-through; color: gray;">${name}</li>`;
-      }
-    });
-  }
-
-  db.collection('games').onSnapshot(snapshot => {
-    updateAttendance(snapshot);
-  });
-</script>
+  </script>
 </body>
 </html>
